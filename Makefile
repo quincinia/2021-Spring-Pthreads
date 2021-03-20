@@ -1,7 +1,7 @@
 #
 # if you don't give make a 'target', it will try the first one:
 #
-default: test
+default: sumsq par_sumsq
 
 #
 # you will start with the serial version:
@@ -21,7 +21,7 @@ par_sumsq: par_sumsq.c
 #
 clean:
 	@echo "==== Removing files ... ===="
-	rm -f sumsq par_sumsq test.txt
+	rm -f sumsq par_sumsq
 
 
 #
