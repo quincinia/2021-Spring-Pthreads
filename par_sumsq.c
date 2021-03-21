@@ -64,7 +64,7 @@ int main(int argc, char* argv[])
   int num_workers = atoi(argv[2]);
   pthread_t workers[num_workers];
   for (int i = 0; i < num_workers; i++) {
-    printf("Master: creating thread %d\n", i);
+    //printf("Master: creating thread %d\n", i);
     pthread_create(&workers[i], NULL, thread_routine, (void*) i);
   }  
   
@@ -85,7 +85,7 @@ int main(int argc, char* argv[])
     if (action == 'p') {            // add action to task queue
       pthread_mutex_lock(&queue_lock);
       // debug
-      printf("Master: adding task: %ld\n", num);
+      //printf("Master: adding task: %ld\n", num);
       add_task(num);
       pthread_cond_broadcast(&not_empty);
       pthread_mutex_unlock(&queue_lock);
@@ -101,7 +101,7 @@ int main(int argc, char* argv[])
   // file is empty; there will be no more future tasks
   pthread_mutex_lock(&queue_lock);
   // debug
-  printf("Master: no more tasks\n");
+  //printf("Master: no more tasks\n");
   future_tasks = false;
 
   // unblock threads that assume there will be more tasks
@@ -110,7 +110,7 @@ int main(int argc, char* argv[])
 
   // wait for current threads to finish processing
   // debug
-  printf("Master: waiting for threads to finish\n");
+  //printf("Master: waiting for threads to finish\n");
   for (int i = 0; i < num_workers; i++)
     pthread_join(workers[i], NULL);
   
@@ -128,7 +128,7 @@ void* thread_routine(void* arg) {
     pthread_mutex_lock(&queue_lock);
 
     // debug
-    printf("Thread %d waiting\n", (int)arg);
+    //printf("Thread %d waiting\n", (int)arg);
 
     // wait for queue to be populated
     while (queue.head == NULL) {
@@ -150,7 +150,7 @@ void* thread_routine(void* arg) {
     long num = remove_task();
 
     // debug
-    printf("Thread %d processing value %ld\n", (int)arg, num);
+    //printf("Thread %d processing value %ld\n", (int)arg, num);
 
     // queue access is finished, return control
     pthread_mutex_unlock(&queue_lock);
@@ -160,7 +160,7 @@ void* thread_routine(void* arg) {
     
   }
   // debug
-  printf("Thread %d exiting\n", (int)arg);
+  //printf("Thread %d exiting\n", (int)arg);
   return arg;
 }
 
