@@ -103,6 +103,9 @@ int main(int argc, char* argv[])
   // debug
   printf("Master: no more tasks\n");
   future_tasks = false;
+
+  // unblock threads that assume there will be more tasks
+  pthread_cond_broadcast(&not_empty);
   pthread_mutex_unlock(&queue_lock);
 
   // wait for current threads to finish processing
