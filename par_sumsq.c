@@ -84,6 +84,8 @@ int main(int argc, char* argv[])
   while (fscanf(fin, "%c %ld\n", &action, &num) == 2) {
     if (action == 'p') {            // add action to task queue
       pthread_mutex_lock(&queue_lock);
+      // debug
+      printf("Master: adding task: %ld\n", num);
       add_task(num);
       pthread_cond_broadcast(&not_empty);
       pthread_mutex_unlock(&queue_lock);
@@ -98,10 +100,14 @@ int main(int argc, char* argv[])
   
   // file is empty; there will be no more future tasks
   pthread_mutex_lock(&queue_lock);
+  // debug
+  printf("Master: no more tasks\n");
   future_tasks = false;
   pthread_mutex_unlock(&queue_lock);
 
   // wait for current threads to finish processing
+  // debug
+  printf("Master: waiting for threads to finish\n");
   for (int i = 0; i < num_workers; i++)
     pthread_join(workers[i], NULL);
   
@@ -113,20 +119,30 @@ int main(int argc, char* argv[])
 }
 
 void* thread_routine(void* arg) {
+  bool no_work_left = false;
   while (true) {
     // gain access to queue
     pthread_mutex_lock(&queue_lock);
 
-    // check if there is work to do
-    if (!future_tasks && queue.head == NULL) {
+    // debug
+    printf("Thread %d waiting\n", (int)arg);
+
+    // wait for queue to be populated
+    while (queue.head == NULL) {
+      // if we know the queue will never be populated, then we will not wait
+      if (!future_tasks) {
+        no_work_left = true;
+        break;
+      }
+      pthread_cond_wait(&not_empty, &queue_lock);
+    }
+    
+    // if there is no work to do, we can end
+    if (no_work_left) {
       pthread_mutex_unlock(&queue_lock);
       break;
     }
-
-    // wait for queue to be populated
-    while (queue.head == NULL)
-      pthread_cond_wait(&not_empty, &queue_lock);
-
+    
     // queue has been populated and control has been given to us; grab value
     long num = remove_task();
 
@@ -138,7 +154,10 @@ void* thread_routine(void* arg) {
 
     // process number and update globals
     calculate_square(num);
+    
   }
+  // debug
+  printf("Thread %d exiting\n", (int)arg);
   return arg;
 }
 
