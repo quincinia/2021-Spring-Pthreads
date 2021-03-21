@@ -52,11 +52,11 @@ int main(int argc, char* argv[])
 {
   // check and parse command line options
   if (argc != 3) {
-    printf("Error: incorrect # of arguments");
+    printf("Error: incorrect # of arguments\n");
     exit(EXIT_FAILURE);
   }
   if (atoi(argv[2]) <= 0) {
-    printf("Error: non-positive worker #");
+    printf("Error: non-positive worker #\n");
     exit(EXIT_FAILURE);
   }
   
@@ -64,7 +64,7 @@ int main(int argc, char* argv[])
   int num_workers = atoi(argv[2]);
   pthread_t workers[num_workers];
   for (int i = 0; i < num_workers; i++) {
-    printf("Master: creating thread %d", i);
+    printf("Master: creating thread %d\n", i);
     pthread_create(&workers[i], NULL, thread_routine, (void*) i);
   }  
   
@@ -131,7 +131,7 @@ void* thread_routine(void* arg) {
     long num = remove_task();
 
     // debug
-    printf("Thread %d processing value %ld", (int)arg, num);
+    printf("Thread %d processing value %ld\n", (int)arg, num);
 
     // queue access is finished, return control
     pthread_mutex_unlock(&queue_lock);
@@ -192,7 +192,7 @@ void add_task(long num) {
 
   // error check
   if (new_node == NULL) {
-    printf("Error: malloc error");
+    printf("Error: malloc error\n");
   }
 
   // put values into node
