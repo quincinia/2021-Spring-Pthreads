@@ -60,6 +60,13 @@ int main(int argc, char* argv[])
     exit(EXIT_FAILURE);
   }
   
+  // initialize mutex locks
+  pthread_mutex_init(&queue_lock, NULL);
+  pthread_mutex_init(&globals_lock, NULL);
+  
+  // initialize condition variable
+  pthread_cond_init(&not_empty, NULL);
+  
   // generate workers
   int num_workers = atoi(argv[2]);
   pthread_t workers[num_workers];
@@ -68,12 +75,6 @@ int main(int argc, char* argv[])
     pthread_create(&workers[i], NULL, thread_routine, (void*) i);
   }  
   
-  // initialize mutex locks
-  pthread_mutex_init(&queue_lock, NULL);
-  pthread_mutex_init(&globals_lock, NULL);
-  
-  // initialize condition variable
-  pthread_cond_init(&not_empty, NULL);
   
   // load numbers and add them to the queue
   char *fn = argv[1];
@@ -88,6 +89,7 @@ int main(int argc, char* argv[])
       printf("Master: adding task: %ld\n", num);
       add_task(num);
       pthread_cond_broadcast(&not_empty);
+      //printf("Task broadcast\n");
       pthread_mutex_unlock(&queue_lock);
     } else if (action == 'w') {     // wait, nothing new happening
       sleep(num);
@@ -230,6 +232,8 @@ void add_task(long num) {
 
   // set new tail
   queue.tail = &new_node->next;
+  
+  printf("New task added\n");
 }
 
 /*

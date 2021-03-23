@@ -60,14 +60,6 @@ int main(int argc, char* argv[])
     exit(EXIT_FAILURE);
   }
   
-  // generate workers
-  int num_workers = atoi(argv[2]);
-  pthread_t workers[num_workers];
-  for (int i = 0; i < num_workers; i++) {
-    //printf("Master: creating thread %d\n", i);
-    pthread_create(&workers[i], NULL, thread_routine, (void*) i);
-  }  
-  
   // initialize mutex locks
   pthread_mutex_init(&queue_lock, NULL);
   pthread_mutex_init(&globals_lock, NULL);
@@ -75,6 +67,14 @@ int main(int argc, char* argv[])
   // initialize condition variable
   pthread_cond_init(&not_empty, NULL);
   
+  // generate workers
+  int num_workers = atoi(argv[2]);
+  pthread_t workers[num_workers];
+  for (int i = 0; i < num_workers; i++) {
+    //printf("Master: creating thread %d\n", i);
+    pthread_create(&workers[i], NULL, thread_routine, (void*) i);
+  }  
+    
   // load numbers and add them to the queue
   char *fn = argv[1];
   FILE* fin = fopen(fn, "r");
